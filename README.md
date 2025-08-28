@@ -11,6 +11,25 @@ A simple Go application that recursively searches a directory (and its subdirect
 ## Requirements
 
 - Go 1.19 or newer
+- Inkscape must be installed
+    - Linux (Debian/Ubuntu):
+
+        ```
+        sudo apt-get update
+        sudo apt-get install inkscape
+        ```
+    - Mac (using Homebrew):
+
+        ```
+        brew install --cask inkscape
+        ```
+    - Windows:
+
+        Download the installer from https://inkscape.org/release/
+        Run the installer and follow the prompts.
+
+  Note:
+  After installation, make sure inkscape is in your system’s PATH so your Go code can call it from the command line.
 
 ## Installation
 

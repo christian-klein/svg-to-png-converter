@@ -1,61 +1,30 @@
 package converter
 
 import (
-	"fmt"
-	"image"
-
-	"image/png"
-	"os"
-	"path/filepath"
-	"svg-to-png-converter/src/types"
-
-	"github.com/srwiley/oksvg"
-	"github.com/srwiley/rasterx"
+    "fmt"
+    "os/exec"
+    "path/filepath"
+    "svg-to-png-converter/src/types"
 )
 
-// ConvertSVGToPNG converts an SVG file to a PNG file.
+// ConvertSVGToPNG converts an SVG file to a PNG file using ImageMagick's convert command.
 func ConvertSVGToPNG(svgPath string, opts *types.Options) error {
-	svg, _ := oksvg.ReadIcon(svgPath, oksvg.WarnErrorMode)
-	width := int(svg.ViewBox.W)
-	height := int(svg.ViewBox.H)
+    pngPath := filepath.Dir(svgPath) + "/" + basename(svgPath) + ".png"
+
+    cmd := exec.Command("inkscape", "--export-filename="+pngPath, svgPath)
 
 	if opts.Debug {
-		fmt.Println("\nProcessing SVG file:", svgPath)
-		fmt.Println("SVG ViewBox Width:", width, "Height:", height)
-	}
-
-	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	scanner := rasterx.NewScannerGV(width, height, img, img.Bounds())
-	raster := rasterx.NewDasher(width, height, scanner)
-
-	svg.SetTarget(0, 0, float64(width), float64(height))
-
-	opacity := 1.0
-	svg.Draw(raster, opacity)
-	
-	name := filepath.Dir(svgPath) + "/" + basename(svgPath) + ".png"
-
-	if opts.Debug {
-		fmt.Println("Saving PNG file:", name)
-	}
-
-	// Save the PNG file
-	file, err := os.Create(name)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	err = png.Encode(file, img)
-	if err != nil {
-		panic(err)
-	}
-
-	return nil
+        fmt.Println("Running:", cmd.String())
+    }
+    err := cmd.Run()
+    if err != nil {
+        return fmt.Errorf("ImageMagick convert failed: %w", err)
+    }
+    return nil
 }
 
 func basename(filePath string) string {
-	fileName := filepath.Base(filePath)
-	extension := filepath.Ext(fileName)
-	return fileName[0 : len(fileName)-len(extension)]
+    fileName := filepath.Base(filePath)
+    extension := filepath.Ext(fileName)
+    return fileName[0 : len(fileName)-len(extension)]
 }
